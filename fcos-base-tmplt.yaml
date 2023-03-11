@@ -335,19 +335,43 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-#mount smb share
-    - name: var-Media.mount
+# mount smb share
+#    - name: var-Media.mount
+#      enabled: true
+#      contents: |
+#        [Unit]
+#        Description=Mount data directory
+#        [Mount]
+#        What=//192.168.7.228/Media/Media
+#        Where=/var/Media
+#        Type=cifs
+#        Options=nofail,vers=2.0,iocharset=utf8,credentials=/home/serveradmin/.sambacreds
+#        TimeoutSec=30
+#
+#        [Install]
+#        WantedBy=multi-user.target
+
+# install app overlays for ostree
+    - name: setup-cockpit.service
       enabled: true
       contents: |
         [Unit]
-        Description=Mount data directory
-        [Mount]
-        What=//192.168.7.228/Media/Media
-        Where=/var/Media
-        Type=cifs
-        Options=nofail,vers=2.0,iocharset=utf8,credentials=/home/serveradmin/.sambacreds
-        TimeoutSec=30
+        Description=Cockpit install
+        Before=boot-complete.target
+        After=network-online.target
+        Require=network-online.target
+        ConditionFirstBoot=true
 
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/bin/rpm-ostree install cockpit-ostree cockpit-podman cockpit-storaged cockpit-system
+        ExecStart=/bin/echo 'PasswordAuthentication yes'
+        ExecStart=/bin/tee /etc/ssh/sshd_config.d/02-enable-passwords.conf
+        ExecStart=/bin/systemctl try-restart sshd
+        ExecStart=/bin/podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws
+        ExecStart=/bin/podman container runlabel INSTALL quay.io/cockpit/ws
+        ExecStart=/bin/systemctl enable cockpit.service
         [Install]
         WantedBy=multi-user.target
 
