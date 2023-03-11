@@ -358,7 +358,7 @@ systemd:
         inline: |
                 PasswordAuthentication yes
 
-# install app overlays for ostree
+# install cockpit overlays for ostree
     - name: setup-cockpit.service
       enabled: true
       contents: |
@@ -379,10 +379,28 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+# start podman container for cockpit
+    - name: setup-cockpit-podman.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Cockpit install
+        Before=boot-complete.target
+        After=network-online.target
+        Require=network-online.target
+        ConditionPathExists=/var/lib/cockpit.stamp
+        ConditionPathExists=!/var/lib/cockpitpodman.stamp
 
-#        ExecStart=/bin/podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws
-#        ExecStart=/bin/podman container runlabel INSTALL quay.io/cockpit/ws
-#        ExecStart=/bin/systemctl enable cockpit.service
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/bin/podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws
+        ExecStart=/bin/podman container runlabel INSTALL quay.io/cockpit/ws
+        ExecStart=/bin/systemctl enable cockpit.service
+        ExecStart=/bin/touch /var/lib/cockpitpodman.stamp
+
+        [Install]
+        WantedBy=multi-user.target
 
 # fstrim
     - name: fstrim.timer
