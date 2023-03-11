@@ -335,6 +335,22 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+#mount smb share
+    - name: var-Media.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount data directory
+        [Mount]
+        What=//192.168.7.228/Media/Media
+        Where=/var/Media
+        Type=cifs
+        Options=nofail,vers=2.0,iocharset=utf8,credentials=/home/serveradmin/.sambacreds
+        TimeoutSec=30
+
+        [Install]
+        WantedBy=multi-user.target
+
 # fstrim
     - name: fstrim.timer
       enabled: true
