@@ -360,7 +360,7 @@ systemd:
         Before=boot-complete.target
         After=network-online.target
         Require=network-online.target
-        ConditionFirstBoot=true
+        ConditionPathExists=!/var/lib/cockpit.stamp
 
         [Service]
         Type=oneshot
@@ -369,11 +369,15 @@ systemd:
         ExecStart=/bin/echo 'PasswordAuthentication yes'
         ExecStart=/bin/tee /etc/ssh/sshd_config.d/02-enable-passwords.conf
         ExecStart=/bin/systemctl try-restart sshd
-        ExecStart=/bin/podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws
-        ExecStart=/bin/podman container runlabel INSTALL quay.io/cockpit/ws
-        ExecStart=/bin/systemctl enable cockpit.service
+        ExecStart=/bin/touch /var/lib/cockpit.stamp
+        ExecStart=/bin/systemctl --no-block reboot
+
         [Install]
         WantedBy=multi-user.target
+
+#        ExecStart=/bin/podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws
+#        ExecStart=/bin/podman container runlabel INSTALL quay.io/cockpit/ws
+#        ExecStart=/bin/systemctl enable cockpit.service
 
 # fstrim
     - name: fstrim.timer
