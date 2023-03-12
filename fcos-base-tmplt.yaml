@@ -383,7 +383,7 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Cockpit install
+        Description=Cockpit Podman install
         Before=boot-complete.target
         After=network-online.target
         Require=network-online.target
