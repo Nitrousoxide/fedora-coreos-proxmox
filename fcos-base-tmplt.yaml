@@ -276,7 +276,7 @@
           kernel.printk=4
 
 # enable password login
-    - path: /etc/ssh/sshd_config.d/cockpit_enable_password_access.conf
+    - path: /etc/ssh/sshd_config.d/02-enable-passwords.conf
       mode: 0644
       contents:
         inline: |
