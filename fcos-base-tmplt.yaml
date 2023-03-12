@@ -356,7 +356,7 @@ systemd:
       mode: 0644
       contents:
         inline: |
-                PasswordAuthentication yes
+          PasswordAuthentication yes
 
 # install cockpit overlays for ostree
     - name: setup-cockpit.service
