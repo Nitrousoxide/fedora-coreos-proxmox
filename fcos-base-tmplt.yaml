@@ -275,6 +275,12 @@
           # to hide audit messages from the interactive console
           kernel.printk=4
 
+# enable password login
+    - path: /etc/ssh/sshd_config.d/cockpit_enable_password_access.conf
+      mode: 0644
+      contents:
+        inline: |
+          PasswordAuthentication yes
 
 # geco-motd.service
 systemd:
@@ -350,13 +356,6 @@ systemd:
 #
 #        [Install]
 #        WantedBy=multi-user.target
-
-# enable password login
-    - path: /etc/ssh/sshd_config.d/cockpit_enable_password_access.conf
-      mode: 0644
-      contents:
-        inline: |
-          PasswordAuthentication yes
 
 # install cockpit overlays for ostree
     - name: setup-cockpit.service
