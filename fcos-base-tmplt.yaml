@@ -347,7 +347,7 @@ systemd:
         RemainAfterExit=yes
         ExecStart=/bin/rpm-ostree install qemu-guest-agent
         ExecStart=/bin/touch /var/lib/qemu-guest-agent.stamp
-
+        ExecStart=/bin/systemctl --no-block reboot
 
         [Install]
         WantedBy=multi-user.target
@@ -362,6 +362,7 @@ systemd:
         Before=boot-complete.target
         After=network-online.target
         Require=network-online.target
+        ConditionPathExists=/var/lib/qemu-guest-agent.stamp
         ConditionPathExists=!/var/lib/cockpit.stamp
 
         [Service]
@@ -418,14 +419,14 @@ systemd:
         Before=systemd-user-sessions.service
         OnFailure=emergency.target
         OnFailureJobMode=replace-irreversibly
-        ConditionPathExists=/var/lib/k3s-prereq-installed
-        ConditionPathExists=!/var/lib/k3s-installed
+        ConditionPathExists=/var/lib/cockpit.stamp
+        ConditionPathExists=!/var/lib/k3s-installed.stamp
 
         [Service]
         RemainAfterExit=yes
         Type=oneshot
         ExecStart=/usr/local/bin/run-k3s-installer
-        ExecStartPost=/usr/bin/touch /var/lib/k3s-installed
+        ExecStartPost=/usr/bin/touch /var/lib/k3s-installed.stamp
         StandardOutput=kmsg+console
         StandardError=kmsg+console
 
