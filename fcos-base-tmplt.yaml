@@ -414,11 +414,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
+        Before=boot-complete.target
         After=network-online.target
-        Wants=network-online.target
-        Before=systemd-user-sessions.service
-        OnFailure=emergency.target
-        OnFailureJobMode=replace-irreversibly
+        Require=network-online.target
         ConditionPathExists=/var/lib/cockpit.stamp
         ConditionPathExists=!/var/lib/k3s-installed.stamp
 
