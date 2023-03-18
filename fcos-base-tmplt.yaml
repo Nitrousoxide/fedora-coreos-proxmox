@@ -292,6 +292,8 @@
             export K3S_KUBECONFIG_MODE="644"
             curl -sfL https://get.k3s.io | sh -
             return 0
+            }
+            main
 
 # geco-motd.service
 systemd:
@@ -338,7 +340,7 @@ systemd:
         Description=Geco-iT Setup Qemu Guest Agent
         Before=boot-complete.target
         After=network-online.target
-        Require=network-online.target
+        Wants=network-online.target
         ConditionKernelCommandLine=ignition.platform.id=qemu
         ConditionPathExists=!/var/lib/qemu-guest-agent.stamp
 
@@ -361,7 +363,7 @@ systemd:
         Description=Cockpit install
         Before=boot-complete.target
         After=network-online.target
-        Require=network-online.target
+        Wants=network-online.target
         ConditionPathExists=/var/lib/qemu-guest-agent.stamp
         ConditionPathExists=!/var/lib/cockpit.stamp
 
@@ -383,7 +385,7 @@ systemd:
         Description=Cockpit Podman install
         Before=boot-complete.target
         After=network-online.target
-        Require=network-online.target
+        Wants=network-online.target
         ConditionPathExists=/var/lib/cockpit.stamp
         ConditionPathExists=!/var/lib/cockpitpodman.stamp
 
@@ -416,7 +418,7 @@ systemd:
         [Unit]
         Before=boot-complete.target
         After=network-online.target
-        Require=network-online.target
+        Wants=network-online.target
         ConditionPathExists=/var/lib/cockpit.stamp
         ConditionPathExists=!/var/lib/k3s-installed.stamp
 
