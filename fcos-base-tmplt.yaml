@@ -275,6 +275,12 @@
           # to hide audit messages from the interactive console
           kernel.printk=4
 
+# enable password login
+    - path: /etc/ssh/sshd_config.d/02-enable-passwords.conf
+      mode: 0644
+      contents:
+        inline: |
+          PasswordAuthentication yes
 
 # geco-motd.service
 systemd:
@@ -331,6 +337,51 @@ systemd:
         ExecStart=/bin/rpm-ostree install qemu-guest-agent
         ExecStart=/bin/touch /var/lib/qemu-guest-agent.stamp
         ExecStart=/bin/systemctl --no-block reboot
+
+        [Install]
+        WantedBy=multi-user.target
+
+
+# install cockpit overlays for ostree
+    - name: setup-cockpit.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Cockpit install
+        Before=boot-complete.target
+        After=network-online.target
+        Require=network-online.target
+        ConditionPathExists=!/var/lib/cockpit.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/bin/rpm-ostree install cockpit-ostree cockpit-podman cockpit-storaged cockpit-system
+        ExecStart=/bin/touch /var/lib/cockpit.stamp
+        ExecStart=/bin/systemctl --no-block reboot
+
+        [Install]
+        WantedBy=multi-user.target
+
+# start podman container for cockpit
+    - name: setup-cockpit-podman.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Cockpit Podman install
+        Before=boot-complete.target
+        After=network-online.target
+        Require=network-online.target
+        ConditionPathExists=/var/lib/cockpit.stamp
+        ConditionPathExists=!/var/lib/cockpitpodman.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/bin/podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws
+        ExecStart=/bin/podman container runlabel INSTALL quay.io/cockpit/ws
+        ExecStart=/bin/systemctl enable cockpit.service
+        ExecStart=/bin/touch /var/lib/cockpitpodman.stamp
 
         [Install]
         WantedBy=multi-user.target
