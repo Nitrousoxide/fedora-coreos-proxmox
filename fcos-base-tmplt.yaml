@@ -427,8 +427,6 @@ systemd:
         Type=oneshot
         ExecStart=/usr/local/bin/run-k3s-installer
         ExecStartPost=/usr/bin/touch /var/lib/k3s-installed.stamp
-        StandardOutput=kmsg+console
-        StandardError=kmsg+console
 
         [Install]
         WantedBy=multi-user.target
