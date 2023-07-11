@@ -25,6 +25,34 @@
           sleep 1; echo -e "\e[33mIPv4 Address:\e[0m $(ip route get 8.8.8.8 | awk 'NR==1 {print $7}')" >> ${OUT}
           echo -e "\e[33mPublic IPv4 Address:\e[0m $(curl https://ipv4.icanhazip.com)\n" >> ${OUT}
 
+#Cockpit Quadlet
+    - path: /etc/containers/systemd/cockpit
+      mode: 0755
+      contents:
+        inline: |
+          [Unit]
+          Description=Cockpit Container
+          After=network-online.target
+          Wants=network-online.target
+
+          [Container]
+          Image=quay.io/cockpit/ws:latest
+          ContainerName=cockpit-ws
+          Environment=NAME=cockpit-ws
+
+          #flag for autoupdates
+          Label=io.containers.autoupdate=registry
+
+          Volume=/:/host
+          PodmanArgs=--pid host --privileged
+          Exec=/container/label-run
+
+          [Service]
+          Restart=always
+
+          [Install]
+          WantedBy=default.target
+
 # apply cloudinit script
     - path: /usr/local/bin/geco-cloudinit
       mode: 0755
@@ -378,9 +406,10 @@ systemd:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/bin/podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws
-        ExecStart=/bin/podman container runlabel INSTALL quay.io/cockpit/ws
+        ExecStart=/bin/mv /etc/containers/systemd/cockpit /etc/containers/systemd/cockpit.container
+        ExecStart=/bin/systemctl daemon-reload
         ExecStart=/bin/systemctl enable cockpit.service
+        ExecStart=/bin/systemctl start cockpit.service
         ExecStart=/bin/touch /var/lib/cockpitpodman.stamp
 
         [Install]
